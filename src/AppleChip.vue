@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onUpdated } from 'vue'
+import { computed } from 'vue'
 
 import benchmarks from '@/benchmarks'
 
@@ -114,7 +114,7 @@ const cpuTypeToMoniker = computed(() => {
   height: 140%;
   border-radius: 50%;
   left: -20%;
-  animation: animate-rotate 45s linear infinite;
+  animation: animate-rotate 75s linear infinite;
   filter: blur(50px);
 }
 

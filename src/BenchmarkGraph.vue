@@ -97,7 +97,6 @@ const processorNames = computed(() => {
 })
 
 const config = computed(() => ({
-  customPalette: [],
   showTable: true,
   showZoom: false,
   table: {
@@ -118,7 +117,6 @@ const config = computed(() => ({
     tooltip: {
       borderColor: 'transparent',
       customFormat: ({ seriesIndex, datapoint, series }) => {
-        console.log(series)
         let content = ''
         let processor = processorNames.value[seriesIndex]
 

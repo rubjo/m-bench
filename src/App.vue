@@ -1,12 +1,12 @@
 <template>
-  <div class="grid my-8">
+  <div class="grid mt-8">
     <div class="col-12 flex justify-content-center align-items-center">
       <h1 class="text-center">What could</h1>
       <AppleChip :generationCount :cpuType class="mx-1" />
       <h1 class="text-center">perform like?</h1>
     </div>
   </div>
-  <div class="grid my-6 justify-content-center align-items-center flex-wrap">
+  <div class="grid my-4 justify-content-center align-items-center flex-wrap">
     <div class="col-12 text-center">
       Show
       <PSelect
@@ -61,6 +61,7 @@
         >Buy me a fully specced Macbook Pro</a
       >
     </div>
+    <div class="col-12 text-center muted">by <a href="https://www.github.com/rubjo">rubjo</a></div>
   </div>
 
   <PDialog v-model:visible="creditsVisible" modal header="Credits" :style="{ width: '25rem' }">
@@ -99,7 +100,7 @@ html {
 }
 
 #app {
-  max-width: 1024px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -113,5 +114,13 @@ pre,
 h1 {
   font-weight: 500;
   filter: drop-shadow(0 0 20px #111) drop-shadow(0 0 40px #111);
+}
+
+a {
+  color: #0ad;
+}
+
+.muted {
+  opacity: 0.3;
 }
 </style>

@@ -53,7 +53,7 @@
       <BenchmarkGraph :generationCount :predictionType :benchmarkType :cpuType />
     </div>
   </div>
-  <div class="grid my-8">
+  <div class="grid my-6">
     <div class="col-12 text-center">
       <a @click.prevent href="" @click="creditsVisible = true">Credits</a>
       &bull;
@@ -131,7 +131,7 @@ html {
   position: absolute;
   z-index: -10;
   width: 100vw;
-  height: 500px;
+  height: 1000px;
   /* mix-blend-mode: screen; */
 }
 
@@ -139,7 +139,7 @@ html {
   position: absolute;
   z-index: -5;
   width: 100vw;
-  height: 500px;
+  height: 1000px;
   background: linear-gradient(to bottom, transparent, #111);
 }
 

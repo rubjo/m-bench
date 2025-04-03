@@ -1,5 +1,7 @@
 <template>
-  <VueDataUi component="VueUiXy" :dataset="dataset" :config="config" />
+  <div class="chart-container">
+    <VueDataUi component="VueUiXy" :dataset="dataset" :config="config" />
+  </div>
 </template>
 
 <script setup>
@@ -72,7 +74,7 @@ const dataset = computed(() => {
       type: 'line',
       dataLabels: false,
       smooth: true,
-      color: '#55ccff',
+      color: '#00aadd',
       series: predictedValues.value,
     },
   ]
@@ -114,7 +116,7 @@ const numberFormatter = (num, digits) => {
 }
 
 const config = computed(() => ({
-  showTable: true,
+  showTable: false,
   showZoom: false,
   table: {
     th: { backgroundColor: 'transparent', color: '#CCCCCC' },
@@ -214,6 +216,13 @@ const config = computed(() => ({
 </script>
 
 <style>
+.chart-container {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 40px 20px 20px;
+  border-radius: 10px;
+  backdrop-filter: blur(5px);
+}
+
 .tooltip {
   padding: 15px;
   background: rgba(0, 0, 0, 0.5);

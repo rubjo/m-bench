@@ -64,6 +64,7 @@ const dataset = computed(() => {
       name: 'Benchmark',
       type: 'bar',
       dataLabels: false,
+      color: '#00aadd',
       series: benchmarkValues.value,
     },
     {
@@ -71,6 +72,7 @@ const dataset = computed(() => {
       type: 'line',
       dataLabels: false,
       smooth: true,
+      color: '#55ccff',
       series: predictedValues.value,
     },
   ]
@@ -96,12 +98,27 @@ const processorNames = computed(() => {
   )
 })
 
+const numberFormatter = (num, digits) => {
+  const lookup = [
+    { value: 1, symbol: '' },
+    { value: 1e3, symbol: 'k' },
+    { value: 1e6, symbol: 'M' },
+    { value: 1e9, symbol: 'G' },
+    { value: 1e12, symbol: 'T' },
+    { value: 1e15, symbol: 'P' },
+    { value: 1e18, symbol: 'E' },
+  ]
+  const regexp = /\.0+$|(?<=\.[0-9]*[1-9])0+$/
+  const item = lookup.findLast((item) => num >= item.value)
+  return item ? (num / item.value).toFixed(digits).replace(regexp, '').concat(item.symbol) : '0'
+}
+
 const config = computed(() => ({
   showTable: true,
   showZoom: false,
   table: {
-    th: { backgroundColor: '#111111', color: '#CCCCCC' },
-    td: { backgroundColor: '#111111', color: '#CCCCCC' },
+    th: { backgroundColor: 'transparent', color: '#CCCCCC' },
+    td: { backgroundColor: 'transparent', color: '#CCCCCC' },
   },
   chart: {
     backgroundColor: 'transparent',
@@ -111,12 +128,13 @@ const config = computed(() => ({
       color: '#CCCCCC',
       textAlign: 'left',
       paddingLeft: 24,
+      fontSize: 20,
     },
-    padding: { left: 75, bottom: 100, right: 30 },
+    padding: { top: 50, left: 100, bottom: 130, right: 30 },
     legend: { show: false },
     tooltip: {
       borderColor: 'transparent',
-      customFormat: ({ seriesIndex, datapoint, series }) => {
+      customFormat: ({ seriesIndex, datapoint }) => {
         let content = ''
         let processor = processorNames.value[seriesIndex]
 
@@ -145,25 +163,52 @@ const config = computed(() => ({
         return `<div class="tooltip">${content}</div>`
       },
     },
-    highlighter: { color: '#000000', opacity: 20 },
+    highlighter: { color: '#ffffff', opacity: 2 },
     grid: {
       labels: {
-        fontSize: 14,
+        fontSize: 30,
         color: '#CCCCCC',
         xAxis: {},
         xAxisLabels: {
+          fontSize: 30,
           rotation: -45,
+          yOffset: 0,
           color: '#CCCCCC',
           values: processorNames.value,
         },
+        yAxis: {
+          formatter: ({ value }) => {
+            return numberFormatter(value, 1)
+          },
+        },
       },
     },
-    labels: { fontSize: 20 },
+    labels: { fontSize: 30 },
     zoom: {
       show: false,
     },
   },
-  line: { radius: 5, labels: { show: true, color: '#CCCCCC', offsetY: -15 } },
+  line: {
+    radius: 8,
+    useGradient: false,
+    strokeWidth: 8,
+    dot: {
+      useSerieColor: false,
+      fill: '#111111',
+      strokeWidth: 5,
+    },
+    labels: {
+      show: true,
+      offsetY: -20,
+      rounding: 0,
+      color: '#cccccc',
+      formatter: null,
+    },
+    area: {
+      useGradient: true,
+      opacity: 20,
+    },
+  },
   bar: { labels: { show: true, color: '#CCCCCC' } },
 }))
 </script>

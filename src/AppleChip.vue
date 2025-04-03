@@ -61,7 +61,7 @@ const cpuTypeToMoniker = computed(() => {
   align-items: center;
 }
 .subtitle {
-  opacity: 0.6;
+  opacity: 0.8;
   display: block;
   user-select: none;
   text-transform: uppercase;
@@ -79,7 +79,6 @@ const cpuTypeToMoniker = computed(() => {
 .m-chip::before,
 .m-chip::after {
   position: absolute;
-  z-index: -1;
   background: linear-gradient(
     90deg,
     rgb(51 0 114 / 100%),
@@ -107,38 +106,27 @@ const cpuTypeToMoniker = computed(() => {
   content: '';
   transform: rotateZ(360deg);
   will-change: transform;
+  mix-blend-mode: plus-lighter;
 }
 
 .m-chip::before {
+  z-index: -1;
   width: 140%;
-  height: 140%;
+  height: 340%;
   border-radius: 50%;
   left: -20%;
-  animation: animate-rotate 75s linear infinite;
-  filter: blur(50px);
+  animation: animate-rotate 50s linear infinite;
+  filter: blur(100px);
 }
 
 .m-chip::after {
-  left: -50%;
-  width: 200%;
+  z-index: -2;
+  width: 500%;
   height: 100%;
   border-radius: 50%;
+  left: -200%;
   animation: animate-rotate 90s linear reverse infinite;
-  filter: blur(50px);
-}
-
-@keyframes animate {
-  0% {
-    background-position: 0 0;
-  }
-
-  50% {
-    background-position: 400% 0;
-  }
-
-  100% {
-    background-position: 0 0;
-  }
+  filter: blur(100px);
 }
 
 @keyframes animate-rotate {

@@ -78,7 +78,6 @@
         >
         by <a href="https://stackoverflow.com/users/3877726/blindman67">Blindman67</a>
       </li>
-      <li>My <a href="https://rubjo.github.io/victor-mono/">Victor Mono</a> coding font</li>
       <li>
         <a
           href="https://stackoverflow.com/questions/9461621/format-a-number-as-2-5k-if-a-thousand-or-more-otherwise-900"
@@ -87,6 +86,7 @@
         by
         <a href="https://stackoverflow.com/users/87015/salman-arshad">Salman Arshad</a>
       </li>
+      <li>My <a href="https://rubjo.github.io/victor-mono/">Victor Mono</a> coding font</li>
     </ul>
     <div class="col-12 text-center muted">by <a href="https://www.github.com/rubjo">rubjo</a></div>
   </PDialog>

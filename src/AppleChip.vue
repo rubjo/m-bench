@@ -48,7 +48,9 @@ const cpuTypeToMoniker = computed(() => {
   background-clip: content-box;
   border-radius: 4px;
   border: 2px outset rgba(100, 100, 100, 0.1);
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.25);
 }
+
 .m-chip .logo {
   opacity: 0.6;
   user-select: none;
@@ -60,6 +62,7 @@ const cpuTypeToMoniker = computed(() => {
   justify-content: center;
   align-items: center;
 }
+
 .subtitle {
   opacity: 0.8;
   display: block;
@@ -70,6 +73,7 @@ const cpuTypeToMoniker = computed(() => {
   font-weight: 450;
   margin-top: -4px;
 }
+
 .m-chip .logo svg {
   width: 36px;
   height: 36px;

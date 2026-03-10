@@ -1,23 +1,43 @@
 <template>
   <div class="grid mt-8">
-    <div class="col-12 flex justify-content-center align-items-center">
+    <div class="col-12 flex justify-content-center align-items-center relative">
       <canvas id="canvas"></canvas>
       <div class="starfield-overlay"></div>
       <h1 class="text-center">What could</h1>
-      <AppleChip :generationCount :cpuType class="mx-1" />
+
+      <!-- Chip selector using PrimeVue Popover -->
+      <div class="mx-2">
+        <!-- Main Apple chip that toggles popover -->
+        <AppleChip
+          :generation="selectedGeneration"
+          :cpuType="cpuType"
+          class="cursor-pointer"
+          @click="togglePopover"
+        />
+
+        <!-- Popover showing available chips -->
+        <PPopover ref="chipPopover">
+          <div class="chip-grid">
+            <AppleChip
+              v-for="option in chipOptions"
+              :key="option"
+              :generation="option"
+              :cpuType="cpuType"
+              :size="48"
+              class="cursor-pointer"
+              :mini-background="false"
+              @click="selectGeneration(option)"
+            />
+          </div>
+        </PPopover>
+      </div>
+
       <h1 class="text-center">perform like?</h1>
     </div>
   </div>
   <div class="grid my-4 justify-content-center align-items-center flex-wrap">
     <div class="col-12 text-center">
       Show
-      <PSelect
-        scroll-height="50vh"
-        class="m-2"
-        v-model="generationCount"
-        :options="Array.from({ length: 16 }, (_, i) => i + 1)"
-      >
-      </PSelect>
       <PSelect class="m-2" v-model="predictionType" :options="['linear', 'logarithmic']"> </PSelect>
       <PSelect
         class="m-2"
@@ -32,7 +52,11 @@
         option-value="value"
       >
       </PSelect>
-      <span class="inline-block m-2">predictions for</span>
+      <span class="inline-block m-2">
+        <span v-if="benchmarkCount > 1">predictions</span>
+        <span v-else>prediction</span>
+        for
+      </span>
       <PSelect
         class="m-2"
         v-model="cpuType"
@@ -65,7 +89,7 @@
     </div>
   </div>
 
-  <PDialog v-model:visible="creditsVisible" modal header="Credits" :style="{ width: '25rem' }">
+  <PDialog v-model:visible="creditsVisible" modal header="Credits" :style="{ width: '28rem' }">
     <ul style="line-height: 2rem">
       <li>Benchmarks from <a href="https://browser.geekbench.com/mac-benchmarks">Geekbench</a></li>
       <li>Chart library: <a href="https://vue-data-ui.graphieros.com/">Vue Data UI</a></li>
@@ -93,22 +117,54 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 import AppleChip from '@/AppleChip.vue'
 import BenchmarkGraph from '@/BenchmarkGraph.vue'
 
 import PSelect from 'primevue/select'
 import PDialog from 'primevue/dialog'
+import PPopover from 'primevue/popover'
+
+import benchmarks from '@/benchmarks'
 
 import hyperDriveInit from '@/hyperdrive.js'
 
-const generationCount = ref(5)
+const chipPopover = ref()
+
 const predictionType = ref('logarithmic')
 const benchmarkType = ref('cpuSingle')
 const cpuType = ref('base')
 
 const creditsVisible = ref(false)
+
+// Toggle popover visibility
+const togglePopover = (event) => {
+  chipPopover.value.toggle(event)
+}
+
+const benchmarkCount = computed(() => {
+  return benchmarks[benchmarkType.value][cpuType.value].length
+})
+
+const chipOptions = computed(() => {
+  const start = benchmarkCount.value + 1
+  const end = start + 9
+
+  return Array.from({ length: 10 }, (_, i) => start + i)
+})
+
+const selectedGeneration = ref(benchmarkCount.value + 5)
+
+// Select a chip and close popover
+const selectGeneration = (gen) => {
+  selectedGeneration.value = gen
+  chipPopover.value.hide()
+}
+
+const generationCount = computed(() => {
+  return selectedGeneration.value - benchmarkCount.value
+})
 
 onMounted(() => {
   hyperDriveInit()
@@ -141,6 +197,14 @@ html {
   width: 100vw;
   height: 1000px;
   background: linear-gradient(to bottom, transparent, #111);
+}
+
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  padding: 0.25rem;
 }
 
 kbd,

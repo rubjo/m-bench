@@ -1,5 +1,5 @@
 <template>
-  <div class="m-chip flex-shrink-0">
+  <div class="m-chip flex-shrink-0" :style="chipStyle" :data-minimal="!miniBackground">
     <div class="logo">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 170" version="1.1">
         <path
@@ -7,7 +7,7 @@
           fill="#fff"
         ></path>
       </svg>
-      <span>M{{ benchmarks.cpuSingle[props.cpuType].length + props.generationCount }}</span>
+      <span>M{{ generation }}</span>
     </div>
     <div class="subtitle">{{ cpuTypeToMoniker }}</div>
   </div>
@@ -16,45 +16,46 @@
 <script setup>
 import { computed } from 'vue'
 
-import benchmarks from '@/benchmarks'
-
 const props = defineProps({
-  generationCount: {
-    type: Number,
-    required: true,
-  },
-  cpuType: {
-    type: String,
-    required: true,
-  },
+  generation: { type: Number, required: true },
+  cpuType: { type: String, required: true },
+  size: { type: Number, default: 128 },
+  miniBackground: { type: Boolean, default: true }, // new prop
 })
 
-const cpuTypeToMoniker = computed(() => {
-  return props.cpuType !== 'base' ? props.cpuType : ''
+const chipStyle = computed(() => {
+  const scale = props.size / 128
+  return {
+    width: `${props.size}px`,
+    height: `${props.size}px`,
+    '--logo-size': `${34 * scale}px`,
+    '--subtitle-size': `${20 * scale}px`,
+    '--svg-size': `${36 * scale}px`,
+  }
 })
+
+const cpuTypeToMoniker = computed(() => (props.cpuType !== 'base' ? props.cpuType : ''))
 </script>
 
 <style scoped>
 .m-chip {
   position: relative;
-  width: 128px;
-  height: 128px;
-  background: linear-gradient(135deg, #1e1e24 10%, #050505 60%);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  user-select: none;
-  background-size: 200% 200%;
-  background-clip: content-box;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 2px outset rgba(100, 100, 100, 0.1);
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.25);
+  user-select: none;
+  background: linear-gradient(135deg, #1e1e24 10%, #050505 60%);
+  background-size: 200% 200%;
+  background-clip: content-box;
 }
 
 .m-chip .logo {
   opacity: 0.6;
   user-select: none;
-  font-size: 34px;
+  font-size: var(--logo-size);
   font-weight: 600;
   color: white;
   text-align: center;
@@ -69,19 +70,21 @@ const cpuTypeToMoniker = computed(() => {
   user-select: none;
   text-transform: uppercase;
   text-align: center;
-  font-size: 20px;
+  font-size: var(--subtitle-size);
   font-weight: 450;
-  margin-top: -4px;
+  margin-top: -0.1rem;
 }
 
 .m-chip .logo svg {
-  width: 36px;
-  height: 36px;
-  margin-top: -7px;
+  width: var(--svg-size);
+  height: var(--svg-size);
+  margin-top: -6%;
 }
 
+/* Gradient pseudo-elements */
 .m-chip::before,
 .m-chip::after {
+  content: '';
   position: absolute;
   background: linear-gradient(
     90deg,
@@ -107,12 +110,12 @@ const cpuTypeToMoniker = computed(() => {
     rgb(247 234 72 / 100%)
   );
   background-size: 400%;
-  content: '';
   transform: rotateZ(360deg);
   will-change: transform;
   mix-blend-mode: plus-lighter;
 }
 
+/* Full gradient */
 .m-chip::before {
   z-index: -1;
   width: 140%;
@@ -133,19 +136,41 @@ const cpuTypeToMoniker = computed(() => {
   filter: blur(100px);
 }
 
+/* Minimal gradient if miniBackground=false */
+.m-chip[data-minimal='true']::before {
+  border-radius: 3px;
+  width: 90%;
+  height: 90%;
+  left: 5%;
+  animation: none;
+  filter: blur(3px);
+}
+
+.m-chip[data-minimal='true']::after {
+  border-radius: 3px;
+  width: 90%;
+  height: 90%;
+  left: 5%;
+  animation: none;
+  filter: blur(3px);
+}
+
+.m-chip[data-minimal='true']:hover::after {
+  filter: blur(8px);
+  transition: filter 0.2s;
+}
+
 @keyframes animate-rotate {
   0% {
-    background-position: 0 0;
     transform: rotate(0deg);
+    background-position: 0 0;
   }
-
   50% {
     background-position: 400% 0;
   }
-
   100% {
-    background-position: 0 0;
     transform: rotate(360deg);
+    background-position: 0 0;
   }
 }
 </style>

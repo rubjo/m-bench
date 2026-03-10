@@ -1,4 +1,4 @@
-const predictNextValues = (data, predictedValues) => {
+export const predictNextValues = (data, predictedValues) => {
   // Calculate the average difference between consecutive data points
   let sumOfDifferences = 0
   for (let i = 1; i < data.length; i++) {
@@ -17,7 +17,7 @@ const predictNextValues = (data, predictedValues) => {
   return predictions
 }
 
-const predictNextValuesLogarithmic = (data, predictedValues) => {
+export const predictNextValuesLogarithmic = (data, predictedValues) => {
   // Handle cases with less than two data points
   if (data.length < 2) {
     return Array(predictedValues).fill(data[data.length - 1] || 0)

@@ -5,14 +5,14 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import { VueDataUi } from 'vue-data-ui'
 import 'vue-data-ui/style.css'
 
 import benchmarks from '@/benchmarks'
 
-import { seriesPredictedValues } from '@/utils'
+import { predictNextValues, predictNextValuesLogarithmic, seriesPredictedValues } from '@/utils'
 
 const props = defineProps({
   generationCount: {
@@ -32,6 +32,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const hoveredIndex = ref(null)
 
 const benchmarkValues = computed(() => {
   return benchmarks[props.benchmarkType][props.cpuType]
@@ -61,7 +63,7 @@ const benchmarkTypeToName = computed(() => {
 })
 
 const dataset = computed(() => {
-  return [
+  const series = [
     {
       name: 'Benchmark',
       type: 'bar',
@@ -78,6 +80,20 @@ const dataset = computed(() => {
       series: predictedValues.value,
     },
   ]
+
+  if (hoveredPredictionValues.value) {
+    series.push({
+      name: 'Old prediction',
+      type: 'line',
+      smooth: true,
+      dashed: true,
+      color: 'rgba(200, 200, 200, 0.75)',
+      dataLabels: false,
+      series: hoveredPredictionValues.value,
+    })
+  }
+
+  return series
 })
 
 const cpuTypeLabel = computed(() => {
@@ -115,8 +131,33 @@ const numberFormatter = (num, digits) => {
   return item ? (num / item.value).toFixed(digits).replace(regexp, '').concat(item.symbol) : '0'
 }
 
+const hoveredPredictionValues = computed(() => {
+  if (hoveredIndex.value === null) return null
+
+  const benchmarkCount = benchmarkValues.value.length
+
+  // Only show when hovering a benchmark that is NOT the last benchmark
+  if (hoveredIndex.value >= benchmarkCount - 1) return null
+
+  const limit = hoveredIndex.value + 1
+
+  if (limit < 2) return null
+
+  const partialData = benchmarkValues.value.slice(0, limit)
+
+  const totalLength = benchmarkCount + props.generationCount
+  const predictionsNeeded = totalLength - limit
+
+  const predicted =
+    props.predictionType === 'logarithmic'
+      ? predictNextValuesLogarithmic(partialData, predictionsNeeded)
+      : predictNextValues(partialData, predictionsNeeded)
+
+  return [...Array(limit), ...predicted]
+})
+
 const config = computed(() => ({
-  showTable: false,
+  showTable: true,
   showZoom: false,
   table: {
     th: { backgroundColor: 'transparent', color: '#CCCCCC' },
@@ -125,40 +166,63 @@ const config = computed(() => ({
   chart: {
     backgroundColor: 'transparent',
     color: '#CCCCCC',
+    fontFamily: 'Victor Mono',
     title: {
       text: benchmarkTypeToName.value,
       color: '#CCCCCC',
       textAlign: 'left',
       paddingLeft: 24,
-      fontSize: 20,
+      fontSize: 24,
     },
-    padding: { top: 50, left: 100, bottom: 130, right: 30 },
+    padding: { top: 30, left: 30, bottom: 0, right: 30 },
     legend: { show: false },
     tooltip: {
       borderColor: 'transparent',
       customFormat: ({ seriesIndex, datapoint }) => {
+        const processor = processorNames.value[seriesIndex]
+        const value = combinedValues.value[seriesIndex]
+
         let content = ''
-        let processor = processorNames.value[seriesIndex]
 
         if (datapoint[0].value) {
-          content = '<strong>' + processor + ' benchmark</strong>'
+          content = `<strong>${processor} benchmark</strong>`
         } else {
-          content = '<strong>' + processor + ' prediction (' + props.predictionType + ')</strong>'
+          content = `<strong>${processor} prediction (${props.predictionType})</strong>`
         }
 
         content += `<table class="w-full" cellspacing="10">`
 
-        // Show percentage increase over any previous values
-        for (let i = seriesIndex; i > 0; i--) {
-          const percentageChange = Math.round(
-            ((combinedValues.value[seriesIndex] - combinedValues.value[i - 1]) /
-              combinedValues.value[i - 1]) *
-              100,
-          )
-          const percentageToFactor = Math.round((100 + percentageChange) / 10) / 10
-          content += `<tr><td class="text-right">From ${processorNames.value[i - 1]}:</td>`
-          content += `<td><span class="tag ${percentageToFactor > 0 ? 'positive' : 'negative'}">${percentageToFactor}x</span></td></tr>`
+        const previousIndex = seriesIndex - 1
+        const lastBenchmarkIndex = benchmarkValues.value.length - 1
+
+        const rows = []
+
+        // Always allow comparison to the immediate previous chip
+        if (previousIndex >= 0) {
+          rows.push(previousIndex)
         }
+
+        // Only compare to the last benchmark if it occurred before this chip
+        if (
+          lastBenchmarkIndex >= 0 &&
+          lastBenchmarkIndex < seriesIndex &&
+          lastBenchmarkIndex !== previousIndex
+        ) {
+          rows.push(lastBenchmarkIndex)
+        }
+
+        rows.forEach((i) => {
+          const percentageChange = Math.round(
+            ((value - combinedValues.value[i]) / combinedValues.value[i]) * 100,
+          )
+
+          const factor = Math.round((100 + percentageChange) / 10) / 10
+
+          content += `<tr>`
+          content += `<td class="text-right">From ${processorNames.value[i]}:</td>`
+          content += `<td><code class="tag ${factor > 0 ? 'positive' : 'negative'}">${factor}x</code></td>`
+          content += `</tr>`
+        })
 
         content += `</table>`
 
@@ -168,32 +232,32 @@ const config = computed(() => ({
     highlighter: { color: '#ffffff', opacity: 2 },
     grid: {
       labels: {
-        fontSize: 30,
+        fontSize: 24,
         color: '#CCCCCC',
         xAxis: {},
         xAxisLabels: {
-          fontSize: 30,
-          rotation: -45,
+          fontSize: 24,
+          rotation: props.generationCount > 6 ? -45 : 0,
           yOffset: 0,
           color: '#CCCCCC',
           values: processorNames.value,
         },
         yAxis: {
           formatter: ({ value }) => {
-            return numberFormatter(value, 1)
+            return numberFormatter(value, 0)
           },
         },
       },
     },
-    labels: { fontSize: 30 },
+    labels: { fontSize: 24 },
     zoom: {
       show: false,
     },
   },
   line: {
-    radius: 8,
+    radius: 10,
     useGradient: false,
-    strokeWidth: 8,
+    strokeWidth: 5,
     dot: {
       useSerieColor: false,
       fill: '#111111',
@@ -212,6 +276,14 @@ const config = computed(() => ({
     },
   },
   bar: { labels: { show: true, color: '#CCCCCC' } },
+  events: {
+    datapointEnter: ({ seriesIndex }) => {
+      hoveredIndex.value = seriesIndex
+    },
+    datapointLeave: () => {
+      hoveredIndex.value = null
+    },
+  },
 }))
 </script>
 

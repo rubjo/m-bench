@@ -12,7 +12,12 @@ import 'vue-data-ui/style.css'
 
 import benchmarks from '@/benchmarks'
 
-import { predictNextValues, predictNextValuesLogarithmic, seriesPredictedValues } from '@/utils'
+import {
+  predictNextValues,
+  predictNextValuesLogarithmic,
+  seriesPredictedValues,
+  lastActualIndex,
+} from '@/utils'
 
 const props = defineProps({
   generationCount: {
@@ -50,13 +55,13 @@ const combinedValues = computed(() => {
 const benchmarkTypeToName = computed(() => {
   switch (props.benchmarkType) {
     case 'cpuSingle':
-      return 'Single-core CPU (Geekbench 6)'
+      return 'Single-core CPU (Geekbench 7)'
     case 'cpuMulti':
-      return 'Multi-core CPU (Geekbench 6)'
+      return 'Multi-core CPU (Geekbench 7)'
     case 'gpuOpenCL':
-      return 'OpenCL GPU (Geekbench 6)'
+      return 'OpenCL GPU (Geekbench 7)'
     case 'gpuMetal':
-      return 'Metal CPU (Geekbench 6)'
+      return 'Metal GPU (Geekbench 7)'
     default:
       return 'Unknown'
   }
@@ -192,8 +197,11 @@ const config = computed(() => ({
 
         content += `<table class="w-full" cellspacing="10">`
 
-        const previousIndex = seriesIndex - 1
-        const lastBenchmarkIndex = benchmarkValues.value.length - 1
+        // Compare against the previous chip that actually has a score. The slot
+        // right before this one may be a generation Apple never shipped.
+        const previousIndex = lastActualIndex(combinedValues.value.slice(0, seriesIndex))
+
+        const lastBenchmarkIndex = lastActualIndex(benchmarkValues.value)
 
         const rows = []
 
